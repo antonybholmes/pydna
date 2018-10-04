@@ -49,7 +49,7 @@ def seq(request):
     id_map = libhttp.parse_params(request, {'db':'ucsc', 
                                             'g':'grch38', 
                                             'chr':'chr3', 
-                                            's':187721377, 
+                                            's':187721357, 
                                             'e':187721577,
                                             'pad5':0,
                                             'pad3':0,
@@ -84,10 +84,14 @@ def seq(request):
       end = start ^ end
       start = start ^ end
     
-    loc = '{}:{}-{}'.format(chr, start, end)
+    loc = libdna.Loc(chr, start, end)
+    
+    print('no', loc)
     
     if pad5 > 0 or pad3 > 0:
         loc = libdna.Loc(loc.chr, loc.start - pad5, loc.end + pad3)
+        
+    print('aha', loc)
     
     dir = os.path.join(settings.DATA_DIR, db, genome)
     
@@ -96,9 +100,9 @@ def seq(request):
     seq = dna.dna(loc, mask=mask, rev_comp=rev_comp, lowercase=lowercase)
     
     if mode == 'text':
-        return HttpResponse('>genome={} location={} strand={} pad5={} pad3={} mask={}\n{}'.format(genome, loc, strand, pad5, pad3, mask, seq), content_type="text/plain")
+        return HttpResponse('>genome={} location={} strand={} pad5={} pad3={} mask={}\n{}'.format(genome, loc.__str__(), strand, pad5, pad3, mask, seq), content_type="text/plain")
     else:
-        return JsonResponse({'genome':genome, 'loc':loc, 'strand':strand, 'seq':seq, 'mask':mask, 'pad5':pad5, 'pad3':pad3}, safe=False)
+        return JsonResponse({'genome':genome, 'loc':loc.__str__(), 'strand':strand, 'seq':seq, 'mask':mask, 'pad5':pad5, 'pad3':pad3}, safe=False)
         
     
 
