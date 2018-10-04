@@ -53,7 +53,8 @@ def seq(request):
                                             'e':187721577, 
                                             'lc': 0,
                                             'mask':'l',
-                                            'rev_comp':0})
+                                            'rev_comp':0,
+                                            'mode':'json'})
     
     db = id_map['db'][0]
     genome = id_map['g'][0]
@@ -65,6 +66,8 @@ def seq(request):
     mask = id_map['mask'][0]
     rev_comp = id_map['rev_comp'][0] == 1
     lowercase = id_map['lc'][0] == 1
+    
+    mode = id_map['mode'][0] == 1
     
     if rev_comp:
         strand = '-'
@@ -84,7 +87,11 @@ def seq(request):
     
     seq = dna.dna(loc, mask=mask, rev_comp=rev_comp, lowercase=lowercase)
     
-    return JsonResponse({'genome':genome, 'loc':loc, 'strand':strand, 'seq':seq}, safe=False)
+    if mode == 'json':
+        return JsonResponse({'genome':genome, 'loc':loc, 'strand':strand, 'seq':seq, 'mask':mask}, safe=False)
+    else:
+        return HttpResponse('>{} {} {} {}\n{}'.format(loc, genome, strand, mask, seq), content_type="text/plain")
+    
 
 
 def genomes(request):
