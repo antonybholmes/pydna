@@ -50,7 +50,7 @@ def seq(request):
                                             'g':'grch38', 
                                             'chr':'chr3', 
                                             's':187721377, 
-                                            'e':187736497, 
+                                            'e':187721577, 
                                             'lc': 0,
                                             'mask':'l',
                                             'rev_comp':0})
