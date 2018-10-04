@@ -50,7 +50,9 @@ def seq(request):
                                             'g':'grch38', 
                                             'chr':'chr3', 
                                             's':187721377, 
-                                            'e':187721577, 
+                                            'e':187721577,
+                                            'pad5':0,
+                                            'pad3':0,
                                             'lc': 0,
                                             'mask':'l',
                                             'rev_comp':0,
@@ -62,6 +64,9 @@ def seq(request):
     chr = id_map['chr'][0]
     start = id_map['s'][0]
     end = id_map['e'][0]
+    
+    pad5 = max(0, id_map['pad5'][0])
+    pad3 = max(0, id_map['pad3'][0])
     
     mask = id_map['mask'][0]
     rev_comp = id_map['rev_comp'][0] == 1
@@ -81,16 +86,20 @@ def seq(request):
     
     loc = '{}:{}-{}'.format(chr, start, end)
     
+    if pad5 > 0 or pad3 > 0:
+        loc = libdna.Loc(loc.chr, loc.start - pad5, loc.end + pad3)
+    
     dir = os.path.join(settings.DATA_DIR, db, genome)
     
     dna = libdna.DNA2Bit(dir)
     
     seq = dna.dna(loc, mask=mask, rev_comp=rev_comp, lowercase=lowercase)
     
-    if mode == 'json':
-        return JsonResponse({'genome':genome, 'loc':loc, 'strand':strand, 'seq':seq, 'mask':mask}, safe=False)
+    if mode == 'text':
+        return HttpResponse('>genome={} location={} strand={} pad5={} pad3={} mask={}\n{}'.format(genome, loc, strand, pad5, pad3, mask, seq), content_type="text/plain")
     else:
-        return HttpResponse('>{} {} {} {}\n{}'.format(loc, genome, strand, mask, seq), content_type="text/plain")
+        return JsonResponse({'genome':genome, 'loc':loc, 'strand':strand, 'seq':seq, 'mask':mask, 'pad5':pad5, 'pad3':pad3}, safe=False)
+        
     
 
 
