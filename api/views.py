@@ -86,13 +86,9 @@ def seq(request):
     
     loc = libdna.Loc(chr, start, end)
     
-    print('no', loc)
-    
     if pad5 > 0 or pad3 > 0:
         loc = libdna.Loc(loc.chr, loc.start - pad5, loc.end + pad3)
         
-    print('aha', loc)
-    
     dir = os.path.join(settings.DATA_DIR, db, genome)
     
     dna = libdna.DNA2Bit(dir)
