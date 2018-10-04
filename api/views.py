@@ -97,6 +97,8 @@ def seq(request):
     
     if mode == 'text':
         return HttpResponse('>genome={} location={} strand={} pad5={} pad3={} mask={}\n{}'.format(genome, loc.__str__(), strand, pad5, pad3, mask, seq), content_type="text/plain")
+    elif mode == 'fasta':
+        return HttpResponse('>genome={} location={} strand={} pad5={} pad3={} mask={}\n{}'.format(genome, loc.__str__(), strand, pad5, pad3, mask, libdna.format_dna(seq)), content_type="text/plain")
     else:
         return JsonResponse({'genome':genome, 'loc':loc.__str__(), 'strand':strand, 'seq':seq, 'mask':mask, 'pad5':pad5, 'pad3':pad3}, safe=False)
         
