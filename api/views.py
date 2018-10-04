@@ -72,7 +72,7 @@ def seq(request):
     rev_comp = id_map['rev_comp'][0] == 1
     lowercase = id_map['lc'][0] == 1
     
-    mode = id_map['mode'][0] == 1
+    mode = id_map['mode'][0]
     
     if rev_comp:
         strand = '-'
