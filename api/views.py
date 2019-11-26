@@ -48,7 +48,7 @@ def seq(request):
     # Defaults should find BCL6
     id_map = libhttp.parse_params(request, {'n':'human', 
                                             'a':'grch38', 
-                                            't': 'ucsc'
+                                            't': 'ucsc',
                                             'chr':'chr3', 
                                             's':187721357, 
                                             'e':187721577,
