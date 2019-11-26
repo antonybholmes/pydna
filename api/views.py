@@ -125,7 +125,7 @@ def genomes(request):
                 
                 if os.path.isdir(d2):
                     for track in os.listdir(d2):
-                        d3 = os.path.join(d2, assembly)
+                        d3 = os.path.join(d2, track)
                         
                         if os.path.isdir(d3):
                             ret.append({'name':name, 'assembly':assembly, 'track':track})
