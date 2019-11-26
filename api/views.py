@@ -38,7 +38,7 @@ CHR_SORT_DICT = {'chr1':1,
                  'chrM':25}
 
 def about(request):
-    return JsonResponse({'name':'genes','version':'1.0','copyright':'Copyright (C) 2018 Antony Holmes'}, safe=False)
+    return JsonResponse({'name':'genes','version':'1.0','copyright':'Copyright (C) 2018-2019 Antony Holmes'}, safe=False)
 
 def seq(request):
     """
@@ -46,8 +46,9 @@ def seq(request):
     """
     
     # Defaults should find BCL6
-    id_map = libhttp.parse_params(request, {'db':'ucsc', 
-                                            'g':'grch38', 
+    id_map = libhttp.parse_params(request, {'n':'human', 
+                                            'a':'grch38', 
+                                            't': 'ucsc'
                                             'chr':'chr3', 
                                             's':187721357, 
                                             'e':187721577,
@@ -58,8 +59,9 @@ def seq(request):
                                             'rev_comp':0,
                                             'mode':'json'})
     
-    db = id_map['db'][0]
-    genome = id_map['g'][0]
+    name = id_map['n'][0]
+    assembly = id_map['a'][0]
+    track = id_map['t'][0]
     
     chr = id_map['chr'][0]
     start = id_map['s'][0]
@@ -89,7 +91,7 @@ def seq(request):
     if pad5 > 0 or pad3 > 0:
         loc = libdna.Loc(loc.chr, loc.start - pad5, loc.end + pad3)
         
-    dir = os.path.join(settings.DATA_DIR, db, genome)
+    dir = os.path.join(settings.DATA_DIR, name, assembly, track)
     
     dna = libdna.DNA2Bit(dir)
     
@@ -100,7 +102,7 @@ def seq(request):
     elif mode == 'fasta':
         return HttpResponse('>genome={} location={} strand={} pad5={} pad3={} mask={}\n{}'.format(genome, loc.__str__(), strand, pad5, pad3, mask, libdna.format_dna(seq)), content_type="text/plain")
     else:
-        return JsonResponse({'genome':genome, 'loc':loc.__str__(), 'strand':strand, 'seq':seq, 'mask':mask, 'pad5':pad5, 'pad3':pad3}, safe=False)
+        return JsonResponse({'name':name, 'assembly':assembly, 'track':track, 'loc':loc.__str__(), 'strand':strand, 'seq':seq, 'mask':mask, 'pad5':pad5, 'pad3':pad3}, safe=False)
         
     
 
@@ -110,22 +112,23 @@ def genomes(request):
     Allow users to search for genes by location
     """
     
-    files = os.listdir(settings.DATA_DIR)
+    names = os.listdir(settings.DATA_DIR)
     
     ret = []
     
-    for file in files:
-        d = os.path.join(settings.DATA_DIR, file)
+    for name in names:
+        d = os.path.join(settings.DATA_DIR, name)
+        
         if os.path.isdir(d):
-            db = file
-            
-            for file2 in os.listdir(d):
-                d2 = os.path.join(d, file2)
+            for assembly in os.listdir(d):
+                d2 = os.path.join(d, assembly)
                 
                 if os.path.isdir(d2):
-                    genome = file2
-                    
-                    ret.append({'db':db, 'genome':genome})
+                    for track in os.listdir(d):
+                        d3 = os.path.join(d, assembly)
+                        
+                        if os.path.isdir(d3):
+                            ret.append({'name':name, 'assembly':assembly, 'track':track})
     
     return JsonResponse(ret, safe=False)
   
@@ -134,12 +137,13 @@ def genome(request):
     Provide details about a genome
     """
     
-    id_map = libhttp.parse_params(request, {'db':'ucsc', 'g':'grch38'})
+    id_map = libhttp.parse_params(request, {'n':'human', 't':'ucsc', 'a':'grch38'})
     
-    db = id_map['db'][0]
-    genome = id_map['g'][0]
+    name = id_map['n'][0]
+    assembly = id_map['a'][0]
+    track = id_map['t'][0]
     
-    dir = os.path.join(settings.DATA_DIR, db, genome)
+    dir = os.path.join(settings.DATA_DIR, name, assembly, track)
     
     """
     Allow users to search for genes by location
@@ -160,7 +164,7 @@ def genome(request):
             
             idx = CHR_SORT_DICT[chr]
             
-            chrs[idx] = {'db':db, 'genome':genome, 'chr':chr, 'size':size}
+            chrs[idx] = {'name':name, 'assembly':assembly, 'track':track, 'chr':chr, 'size':size}
     
     ret = []
     
