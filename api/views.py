@@ -6,9 +6,7 @@ import os
 from dna import settings
 
 import sys
-sys.path.append('/ifs/scratch/cancer/Lab_RDF/abh2138/scripts/python/lib/libhttp/libhttp')
 import libhttp
-sys.path.append('/ifs/scratch/cancer/Lab_RDF/abh2138/scripts/python/lib/libdna')
 import libdna
 
 CHR_SORT_DICT = {'chr1':1,
@@ -37,8 +35,10 @@ CHR_SORT_DICT = {'chr1':1,
                  'chrY':24,
                  'chrM':25}
 
+
+
 def about(request):
-    return JsonResponse({'name':'genes','version':'1.0','copyright':'Copyright (C) 2018-2019 Antony Holmes'}, safe=False)
+    return JsonResponse(settings.ABOUT, safe=False)
 
 def seq(request):
     """
@@ -91,9 +91,13 @@ def seq(request):
     if pad5 > 0 or pad3 > 0:
         loc = libdna.Loc(loc.chr, loc.start - pad5, loc.end + pad3)
         
-    dir = os.path.join(settings.DATA_DIR, name, assembly, track)
+    #dir = os.path.join(settings.DATA_DIR, name, assembly, track)
+    #dna = libdna.DNA2Bit(dir)
     
-    dna = libdna.DNA2Bit(dir)
+    dir = os.path.join('dna', name, assembly, track).lower()
+    print(dir, file=sys.stderr)
+    dna = libdna.AWSS3DNA2Bit(settings.AWS_BUCKET, dir)
+    
     
     seq = dna.dna(loc, mask=mask, rev_comp=rev_comp, lowercase=lowercase)
     
@@ -112,25 +116,42 @@ def genomes(request):
     Allow users to search for genes by location
     """
     
-    names = os.listdir(settings.DATA_DIR)
-    
-    ret = []
-    
-    for name in names:
-        d = os.path.join(settings.DATA_DIR, name)
-        
-        if os.path.isdir(d):
-            for assembly in os.listdir(d):
-                d2 = os.path.join(d, assembly)
-                
-                if os.path.isdir(d2):
-                    for track in os.listdir(d2):
-                        d3 = os.path.join(d2, track)
-                        
-                        if os.path.isdir(d3):
-                            ret.append({'name':name, 'assembly':assembly, 'track':track})
-    
-    return JsonResponse(ret, safe=False)
+#    names = os.listdir(settings.DATA_DIR)
+#    
+#    ret = []
+#    
+#    for name in names:
+#        d = os.path.join(settings.DATA_DIR, name)
+#        
+#        if os.path.isdir(d):
+#            for assembly in os.listdir(d):
+#                d2 = os.path.join(d, assembly)
+#                
+#                if os.path.isdir(d2):
+#                    for track in os.listdir(d2):
+#                        d3 = os.path.join(d2, track)
+#                        
+#                        if os.path.isdir(d3):
+#                            ret.append({'name':name, 'assembly':assembly, 'track':track})
+#    
+#    
+#    s3 = boto3.client('s3')
+#    #bucket = s3.Bucket(settings.AWS_BUCKET)
+#    
+#    
+#    #for file in bucket.objects.filter(Delimiter='/', Prefix='dna/human/'):
+#    #    print(file.key, file=sys.stderr)
+#    
+#    
+#    paginator = s3.get_paginator('list_objects_v2')
+#    
+#    for page in paginator.paginate(Bucket=settings.AWS_BUCKET, Prefix='dna/', Delimiter="/"):
+#       for obj in page['Contents']: #.filter(Prefix="dir_name/"):
+#           print(obj['Key'], file=sys.stderr)
+#    
+#    
+#    ret={}
+    return JsonResponse(settings.GENOMES, safe=False)
   
 def genome(request):
     """

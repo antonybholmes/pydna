@@ -118,7 +118,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
+ABOUT = {'name':'genes','version':'1.0','copyright':'Copyright (C) 2018-2019 Antony Holmes'}
+
 STATIC_URL = '/static/'
 
 
-DATA_DIR = '/ifs/scratch/cancer/Lab_RDF/abh2138/references/ucsc/assembly/2bitext/' #'/mnt/data/genes'
+DATA_DIR = '/ifs/scratch/cancer/Lab_RDF/abh2138/references/ucsc/assembly/2bit/' #'/mnt/data/genes'
+
+AWS_BUCKET = 'lab-rdf-app-data'
+
+GENOMES = [{'name':'human', 'assembly':'grch38', 'track':'ucsc'},
+           {'name':'human', 'assembly':'hg19', 'track':'ucsc'},
+           {'name':'mouse', 'assembly':'mm10', 'track':'ucsc'}]
